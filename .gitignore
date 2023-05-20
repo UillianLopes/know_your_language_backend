@@ -36,4 +36,3 @@ lerna-debug.log*
 
 # Docker - Volumes
 /.volumes
-environments/.env
