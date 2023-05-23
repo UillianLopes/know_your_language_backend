@@ -15,10 +15,9 @@ export class GoogleTokenGuard extends AuthGuard('google-token') {
   ) {
     super();
   }
+
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
-
-    console.log(request.headers);
     if (request.headers && request.headers.authorization) {
       const authorizationArray = request.headers.authorization.split(' ');
       if (authorizationArray && authorizationArray.length > 1) {
@@ -32,6 +31,7 @@ export class GoogleTokenGuard extends AuthGuard('google-token') {
         const payload = oAuthTicket.getPayload();
 
         if (payload) {
+          console.log(payload);
           let userEntity = await this.usersService.findByEmail(payload.email);
           if (userEntity) {
             userEntity.picture != payload.picture &&
@@ -58,6 +58,7 @@ export class GoogleTokenGuard extends AuthGuard('google-token') {
         return true;
       }
     }
+
     throw new UnauthorizedException();
   }
 }

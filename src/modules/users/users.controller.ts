@@ -9,12 +9,12 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { MarkWordAsKnownDto, WordDto } from 'src/dto/word.dto';
+import { MarkWordAsKnownDto, WordDto } from '../../dto/word.dto';
 import { WordsService } from '../../services/words.service';
 import { OkResponseDto } from '../../decorators/single-response-dto.decorator';
 import { UserDto } from '../../dto/user.dto';
 import { GoogleTokenGuard } from '../google-token/google-token.guard';
-import { ResponseDto } from 'src/dto/response.dto';
+import { ResponseDto } from '../../dto/response.dto';
 
 @Controller('users')
 @ApiTags('Users')
@@ -58,6 +58,6 @@ export class UsersController {
     @Body() payload: MarkWordAsKnownDto,
   ) {
     const user = request.user;
-    return await this.wordsService.markAsKnow(user['id'], payload.wordId);
+    return await this.wordsService.markAsKnow(user['id'], payload);
   }
 }

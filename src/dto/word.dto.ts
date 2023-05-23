@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { MeaningDto } from './meaning.dto';
-import { Word } from 'src/entities/word.entity';
 
 export class WordDto {
   @ApiProperty()
@@ -33,7 +32,11 @@ export class MarkWordAsKnownDto {
   @ApiProperty()
   readonly wordId: number;
 
-  constructor(wordId: number) {
+  @ApiProperty()
+  readonly points: number;
+
+  constructor(wordId: number, points: number) {
     this.wordId = wordId;
+    this.points = points;
   }
 }

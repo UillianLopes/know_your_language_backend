@@ -4,32 +4,52 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Word } from '../entities/word.entity';
 import { Repository } from 'typeorm';
 import { Meaning } from '../entities/meaning.entity';
-import { WordDto } from '../dto/word.dto';
+import { MarkWordAsKnownDto, WordDto } from '../dto/word.dto';
 import { User } from '../entities/user.entity';
 import { ResponseDto } from 'src/dto/response.dto';
+import { Score } from 'src/entities/score.entity';
+import { DateTime } from 'luxon';
 
 @Injectable()
 export class WordsService {
   constructor(
     @Inject(OpenAIService) private readonly _openAiService: OpenAIService,
     @InjectRepository(Word) private readonly _wordRepository: Repository<Word>,
+    @InjectRepository(Score)
+    private readonly _scoreRepository: Repository<Score>,
     @InjectRepository(Meaning)
     private readonly _meaningRepository: Repository<Meaning>,
     @InjectRepository(User) private readonly _userRepository: Repository<User>,
   ) {}
 
   async getAUnknownWord(userId: number): Promise<ResponseDto<WordDto>> {
-    let word = await this._wordRepository
+    const subQuery = this._wordRepository
+      .createQueryBuilder('w')
+      .leftJoin('w.users', 'u')
+      .where(`u.id = ${userId}`)
+      .andWhere('w.cached = true')
+      .select('w.id')
+      .getQuery();
+
+    const words = await this._wordRepository
       .createQueryBuilder('word')
-      .leftJoin('word.users', 'user', 'user.id = :userId', { userId })
-      .where(`word.cached = :cached`, { cached: true })
-      .getOne();
+      .where(`word.id NOT IN (${subQuery})`)
+      .andWhere('word.cached = true')
+      .getMany();
+
+    let word = words[0];
 
     if (word) {
-      const meanings = await this._meaningRepository.findBy({
-        word: word,
-      });
-      return ResponseDto.create('', WordDto.fromEntity({ ...word, meanings }));
+      const meanings = await this._meaningRepository
+        .createQueryBuilder('meaning')
+        .where('meaning.wordId = :wordId', { wordId: word.id })
+        .orderBy('meaning.value')
+        .getMany();
+
+      return ResponseDto.create(
+        'Unknown word obtained from the database.',
+        WordDto.fromEntity({ ...word, meanings: this.suffle(meanings) }),
+      );
     }
 
     word = await this._wordRepository
@@ -81,18 +101,21 @@ export class WordsService {
     });
 
     const meanings = await this._meaningRepository.findBy({
-      word: word,
+      word: {
+        id: word.id,
+      },
     });
 
-    const result = ResponseDto.create(
-      'testing',
-      WordDto.fromEntity({ ...word, meanings }),
+    return ResponseDto.create(
+      'Unknown word generated with success.',
+      WordDto.fromEntity({
+        ...word,
+        meanings: this.suffle(meanings),
+      }),
     );
-
-    return result;
   }
 
-  async markAsKnow(userId: number, wordId: number) {
+  async markAsKnow(userId: number, payload: MarkWordAsKnownDto) {
     const user = await this._userRepository.findOneBy({
       id: userId,
     });
@@ -101,16 +124,41 @@ export class WordsService {
       throw new BadRequestException('Invalid user');
     }
 
-    const word = await this._wordRepository.findOneBy({
-      id: wordId,
+    const word = await this._wordRepository.findOne({
+      where: {
+        id: payload.wordId,
+      },
+      relations: ['users'],
     });
 
     if (!word) {
       throw new BadRequestException('Invalid word');
     }
 
-    word.users.push(user);
+    if (word.users) {
+      word.users.push(user);
+    } else {
+      word.users = [user];
+    }
+    await this._wordRepository.save(word);
 
-    return await this._wordRepository.save(word);
+    const score = this._scoreRepository.create({
+      value: payload.points,
+      timestamp: DateTime.utc().toISO(),
+      user: user,
+      word: word,
+    });
+
+    await this._scoreRepository.save(score);
+
+    return ResponseDto.create('Learned', 1);
+  }
+
+  suffle<T>(array: Array<T>) {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
   }
 }

@@ -8,9 +8,11 @@ import { RankingsModule } from './modules/rankings/rankings.module';
 import { UsersModule } from './modules/users/users.module';
 import { WordsModule } from './modules/words/words.module';
 import { GoogleTokenModule } from './modules/google-token/google-token.module';
+import { Score } from './entities/score.entity';
 
 @Module({
   imports: [
+    GoogleTokenModule,
     UsersModule,
     WordsModule,
     RankingsModule,
@@ -25,12 +27,11 @@ import { GoogleTokenModule } from './modules/google-token/google-token.module';
           database: process.env.DB_NAME,
           synchronize: true,
           logging: true,
-          entities: [User, Word, Meaning, Writing],
+          entities: [User, Word, Meaning, Writing, Score],
           migrations: [],
         };
       },
     }),
-    GoogleTokenModule,
   ],
   controllers: [],
 })

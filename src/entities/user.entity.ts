@@ -4,9 +4,11 @@ import {
   Index,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Word } from './word.entity';
+import { Score } from './score.entity';
 
 @Entity()
 export class User {
@@ -21,7 +23,9 @@ export class User {
   email: string;
 
   @ManyToMany(() => Word, (word) => word.users)
-  @JoinTable()
+  @JoinTable({
+    name: 'user_words',
+  })
   words: Word[];
 
   @Column()
@@ -29,4 +33,7 @@ export class User {
 
   @Column({ nullable: true })
   picture: string | null;
+
+  @ManyToOne(() => Score, (score) => score.user)
+  scores: Score[];
 }

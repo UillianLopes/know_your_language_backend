@@ -18,7 +18,7 @@ export default class WordsSeeder implements Seeder {
           }
           const words = wordsPt.getArray();
 
-          resolve(words.filter((d) => !d.includes('-')));
+          resolve(words.filter((d) => d && d.length > 4 && !d.includes('-')));
         });
       });
 
@@ -27,7 +27,11 @@ export default class WordsSeeder implements Seeder {
       }
 
       const words = result.map((word) =>
-        wordsRepository.create({ value: word, locale: Locale.ptBr }),
+        wordsRepository.create({
+          value: word,
+          locale: Locale.ptBr,
+          cached: false,
+        }),
       );
 
       let isDone = false;
