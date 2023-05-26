@@ -9,7 +9,7 @@ import {
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
-import { MarkWordAsKnownDto, WordDto } from '../../dto/word.dto';
+import { MarkWordAsKnownPayloadDto, WordDto } from '../../dto/word.dto';
 import { WordsService } from '../../services/words.service';
 import { OkResponseDto } from '../../decorators/single-response-dto.decorator';
 import { UserDto } from '../../dto/user.dto';
@@ -39,6 +39,7 @@ export class UsersController {
   async unknownWord(@Req() request: Request): Promise<ResponseDto<WordDto>> {
     const user = request.user;
     const result = await this.wordsService.getAUnknownWord(user['id']);
+    console.log(JSON.stringify(result));
     return result;
   }
 
@@ -55,7 +56,7 @@ export class UsersController {
   @OkResponseDto(WordDto)
   async markWordAsKnown(
     @Req() request: Request,
-    @Body() payload: MarkWordAsKnownDto,
+    @Body() payload: MarkWordAsKnownPayloadDto,
   ) {
     const user = request.user;
     return await this.wordsService.markAsKnow(user['id'], payload);

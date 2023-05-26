@@ -5,8 +5,8 @@ import {
   Model,
   OpenAIApi,
 } from 'openai';
-import { OpenAIWordMeaningsDto } from 'src/dto/word_meanings.dto';
-import { Locale } from 'src/enums/locale';
+import { OpenAIWordMeaningsDto } from '../dto/word_meanings.dto';
+import { Locale } from '../enums/locale';
 
 @Injectable()
 export class OpenAIService {

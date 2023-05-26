@@ -8,9 +8,10 @@ import { WordsService } from '../../services/words.service';
 import { Word } from '../../entities/word.entity';
 import { Meaning } from '../../entities/meaning.entity';
 import { Score } from '../../entities/score.entity';
+import { UserWord } from '../../entities/user_word.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([User, Word, Meaning, Score])],
+  imports: [TypeOrmModule.forFeature([User, Word, Meaning, Score, UserWord])],
   controllers: [UsersController],
   providers: [OpenAIService, UsersService, WordsService],
 })

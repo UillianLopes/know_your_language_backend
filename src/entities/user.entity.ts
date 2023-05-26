@@ -2,13 +2,12 @@ import {
   Column,
   Entity,
   Index,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Word } from './word.entity';
 import { Score } from './score.entity';
+import { UserWord } from './user_word.entity';
 
 @Entity()
 export class User {
@@ -22,11 +21,8 @@ export class User {
   @Index({ unique: true })
   email: string;
 
-  @ManyToMany(() => Word, (word) => word.users)
-  @JoinTable({
-    name: 'user_words',
-  })
-  words: Word[];
+  @OneToMany(() => UserWord, (word) => word.user)
+  words: UserWord[];
 
   @Column()
   provider: string;

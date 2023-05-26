@@ -2,7 +2,7 @@ import { Module } from '@nestjs/common';
 import { GoogleTokenGuard } from './google-token.guard';
 import { PassportModule } from '@nestjs/passport';
 import { GoogleTokenStrategy } from './google-token.stategy';
-import { UsersService } from 'src/services/users.service';
+import { UsersService } from '../../services/users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from '../../entities/user.entity';
 
