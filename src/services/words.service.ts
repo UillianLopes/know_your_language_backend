@@ -1,19 +1,20 @@
 import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { OpenAIService } from './openai.service';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Word } from '../entities/word.entity';
+import { DateTime } from 'luxon';
 import { Repository } from 'typeorm';
-import { Meaning } from '../entities/meaning.entity';
+import { ResponseDto } from '../dto/response.dto';
 import {
   MarkWordAsKnownDto,
   MarkWordAsKnownPayloadDto,
   WordDto,
 } from '../dto/word.dto';
-import { User } from '../entities/user.entity';
-import { ResponseDto } from '../dto/response.dto';
+import { Meaning } from '../entities/meaning.entity';
 import { Score } from '../entities/score.entity';
-import { DateTime } from 'luxon';
+import { User } from '../entities/user.entity';
 import { UserWord } from '../entities/user_word.entity';
+import { Word } from '../entities/word.entity';
+import { suffle } from '../utils/shuffle.function';
+import { OpenAIService } from './openai.service';
 
 const MAX_SCORE = 10;
 const SCORE_REASON = 5;
@@ -51,7 +52,7 @@ export class WordsService {
       .select('w.id')
       .getQuery();
 
-    let word = await this._wordRepository
+    const word = await this._wordRepository
       .createQueryBuilder('word')
       .where(`word.id NOT IN (${subQuery})`)
       .andWhere('word.cached = true')
@@ -72,73 +73,15 @@ export class WordsService {
       return ResponseDto.create(
         'Unknown word obtained from the database.',
         WordDto.fromEntity(
-          { ...word, meanings: this.suffle(meanings) },
+          { ...word, meanings: suffle(meanings) },
           userWord?.incorrectAttempts ?? null,
         ),
       );
     }
 
-    word = await this._wordRepository
-      .createQueryBuilder('word')
-      .where('word.cached = false')
-      .orderBy('RANDOM()')
-      .limit(1)
-      .getOne();
+    const wordDto = await this.getAWordWithMeanings();
 
-    if (!word) {
-      throw new BadRequestException('Invalid word');
-    }
-
-    const openAiWord = await this._openAiService.getVariationsOf(
-      word.locale,
-      word.value,
-    );
-
-    if (openAiWord == null) {
-      throw new BadRequestException('Invalid word');
-    }
-
-    const realMeaning = this._meaningRepository.create({
-      value: openAiWord.meaning,
-      isFake: false,
-      word,
-    });
-
-    const fakeMeanings = openAiWord.fakeMeanings.map((meaning) =>
-      this._meaningRepository.create({
-        value: meaning,
-        isFake: true,
-        word,
-      }),
-    );
-
-    await this._meaningRepository.save(fakeMeanings.concat(realMeaning));
-    await this._wordRepository.update(
-      {
-        id: word.id,
-      },
-      {
-        cached: true,
-      },
-    );
-
-    word = await this._wordRepository.findOneBy({
-      id: word.id,
-    });
-
-    const meanings = await this._meaningRepository.findBy({
-      word: {
-        id: word.id,
-      },
-    });
-
-    return ResponseDto.create(
-      'Unknown word generated with success.',
-      WordDto.fromEntity({
-        ...word,
-        meanings: this.suffle(meanings),
-      }),
-    );
+    return ResponseDto.create('Unknown word generated with success.', wordDto);
   }
 
   async markAsKnow(userId: number, payload: MarkWordAsKnownPayloadDto) {
@@ -208,9 +151,9 @@ export class WordsService {
           'Incorrect answer',
           MarkWordAsKnownDto.forGuessTheMeaning(
             false,
-            null,
-            null,
+            correctMeaning.id,
             payload.meaningId,
+            null,
             userWord.incorrectAttempts,
           ),
         );
@@ -233,19 +176,79 @@ export class WordsService {
       'Completed',
       MarkWordAsKnownDto.forGuessTheMeaning(
         true,
-        points,
         correctMeaning.id,
         payload.meaningId,
+        points,
         userWord.incorrectAttempts,
       ),
     );
   }
 
-  suffle<T>(array: Array<T>) {
-    for (let i = array.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [array[i], array[j]] = [array[j], array[i]];
+  async loadMoreWords(count: number): Promise<ResponseDto<WordDto[]>> {
+    const words: WordDto[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const word = await this.getAWordWithMeanings();
+      words.push(word);
     }
-    return array;
+
+    return ResponseDto.create('', words);
+  }
+
+  private async getAWordWithMeanings(): Promise<WordDto | null> {
+    const word = await this._wordRepository
+      .createQueryBuilder('word')
+      .where('word.cached = false')
+      .orderBy('RANDOM()')
+      .limit(1)
+      .getOne();
+
+    if (!word) {
+      return null;
+    }
+
+    const openAiWord = await this._openAiService.getVariationsOf(
+      word.locale,
+      word.value,
+    );
+
+    if (!openAiWord || !openAiWord.success) {
+      return await this.getAWordWithMeanings();
+    }
+
+    const realMeaning = this._meaningRepository.create({
+      value: openAiWord.meaning,
+      isFake: false,
+      word,
+    });
+
+    const fakeMeanings = openAiWord.fakeMeanings.map((meaning) =>
+      this._meaningRepository.create({
+        value: meaning,
+        isFake: true,
+        word,
+      }),
+    );
+
+    await this._meaningRepository.save(fakeMeanings.concat(realMeaning));
+    await this._wordRepository.update(
+      {
+        id: word.id,
+      },
+      {
+        cached: true,
+      },
+    );
+
+    const meanings = await this._meaningRepository.findBy({
+      word: {
+        id: word.id,
+      },
+    });
+
+    return WordDto.fromEntity({
+      ...word,
+      meanings: suffle(meanings),
+    });
   }
 }

@@ -1,4 +1,4 @@
-export enum GameMode {
+export enum EGameMode {
   guessTheWord = 'guessTheWord',
   guessTheMeaning = 'guessTheMeaning',
 }

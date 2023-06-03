@@ -1,6 +1,6 @@
-import { paginateArray } from '../utils/paginate-array.function';
+import { paginate } from '../utils/paginate.function';
 import { Word } from '../entities/word.entity';
-import { Locale } from '../enums/locale';
+import { ELocale } from '../enums/locale.enum';
 import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
 import * as wordsPt from 'words-pt';
@@ -17,7 +17,6 @@ export default class WordsSeeder implements Seeder {
             return;
           }
           const words = wordsPt.getArray();
-
           resolve(words.filter((d) => d && d.length > 4 && !d.includes('-')));
         });
       });
@@ -29,7 +28,7 @@ export default class WordsSeeder implements Seeder {
       const words = result.map((word) =>
         wordsRepository.create({
           value: word,
-          locale: Locale.ptBr,
+          locale: ELocale.ptBr,
           cached: false,
         }),
       );
@@ -39,7 +38,7 @@ export default class WordsSeeder implements Seeder {
       const pageSize = 50;
 
       do {
-        const paginatedWords = paginateArray(words, pageNumber, pageSize);
+        const paginatedWords = paginate(words, pageNumber, pageSize);
         await wordsRepository.save(paginatedWords);
         isDone = pageSize != paginatedWords.length;
         pageNumber++;

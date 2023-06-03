@@ -1,4 +1,4 @@
-export function paginateArray<T>(
+export function paginate<T>(
   array: T[],
   pageNumber: number,
   pageSize: number,

@@ -14,7 +14,7 @@ export class GoogleTokenStrategy extends PassportStrategy(
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      scope: process.env.GOOGLE_SCOPES.split('|'), // Define the required scopes as per your needs
+      scope: process.env.GOOGLE_SCOPES.split('|'),
     });
   }
 
@@ -24,7 +24,6 @@ export class GoogleTokenStrategy extends PassportStrategy(
     profile: Profile,
     done: VerifyCallback,
   ): Promise<void> {
-    console.log('PROFILE', profile);
     const email = this.extractEmails(profile);
 
     if (!email) {

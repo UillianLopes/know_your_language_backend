@@ -76,18 +76,18 @@ export class MarkWordAsKnownDto {
     score: number | null = null,
     incorrectAttempts: number | null = null,
   ) {
+    this.completed = completed;
     this.correctMeaningId = correctMeaningId;
     this.meaningId = meaingId;
     this.score = score;
-    this.completed = completed;
     this.incorrectAttempts = incorrectAttempts;
   }
 
   static forGuessTheMeaning(
     completed: boolean,
-    score: number | null = null,
     correctMeaningId: number | null = null,
     meaningId: number | null,
+    score: number | null = null,
     incorrectAttempts: number | null = null,
   ) {
     return new MarkWordAsKnownDto(

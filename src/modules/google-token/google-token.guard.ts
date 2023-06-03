@@ -31,7 +31,6 @@ export class GoogleTokenGuard extends AuthGuard('google-token') {
         const payload = oAuthTicket.getPayload();
 
         if (payload) {
-          console.log(payload);
           let userEntity = await this.usersService.findByEmail(payload.email);
           if (userEntity) {
             userEntity.picture != payload.picture &&

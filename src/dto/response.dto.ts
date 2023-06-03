@@ -24,6 +24,7 @@ export class ResponseDto<T = any> {
     return new ResponseDto(message, data);
   }
 }
+
 export class ListResponseDto<T = any> extends ResponseDto<T[]> {
   readonly total: number | null;
   readonly chunkSize: number | null;

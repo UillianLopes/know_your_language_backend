@@ -6,7 +6,7 @@ import {
   OpenAIApi,
 } from 'openai';
 import { OpenAIWordMeaningsDto } from '../dto/word_meanings.dto';
-import { Locale } from '../enums/locale';
+import { ELocale } from '../enums/locale.enum';
 
 @Injectable()
 export class OpenAIService {
@@ -33,7 +33,7 @@ export class OpenAIService {
   }
 
   async getVariationsOf(
-    locale: Locale,
+    locale: ELocale,
     word: string,
   ): Promise<OpenAIWordMeaningsDto | null> {
     await this.init();
@@ -73,18 +73,18 @@ export class OpenAIService {
     }
   }
 
-  private _generatePrompt(locale: Locale, word: string) {
+  private _generatePrompt(locale: ELocale, word: string) {
     switch (locale) {
-      case Locale.ptBr:
+      case ELocale.ptBr:
         return this._generatePtBrPrompt(word);
 
-      case Locale.enUs:
+      case ELocale.enUs:
         return this._generateEnUsPrompt(word);
     }
   }
 
   private _generatePtBrPrompt(word: string) {
-    return `Nessa requisição preciso que você funcione da seguinte maneira, vou entrar com uma palavra em português do brasil, e você me dar como saída um json contendo as seguintes propriedades. success = um bool informando se você conseguiu encontrar ou não essa palavra no seu banco de dados. value = uma string contendo a própria palavra  em questão. meaning = um string contendo o significado da palavra em questão. fakeMeanings = um array de strings contento 3 opções de significados que não são corretos porem são parecidos com o significado da palavra. Importante: você deve gerar apenas o json, não retorne nenhum texto além do json, e também não precisa retornar a area de source code que você sempre retorna, o json não deve conter quebras de linhas. Entrada: ${word}`;
+    return `Nesta requisição preciso que você funcione da seguinte maneira, vou entrar com uma palavra em português do brasil, e você deve me dar como saída um json contendo as seguintes propriedades. success = um bool informando se você conseguiu encontrar ou o significado essa palavra no seu banco de dados, caso você não encontre o significado ou a palavra em questão essa propriedade deve ser false, caso encontre o significado essa propriedade deve ser ture, value = uma string contendo a própria palavra  em questão. meaning = um string contendo o significado da palavra em questão, se o significado não for  encontrado retorne uma string vazia "". fakeMeanings = um array de strings contento 3 opções de significados que não são corretos porem são parecidos com o significado da palavra em questão,  caso o significado (meaning) não for encontrado, essa lista deve estar vazia. Importante, você deve gerar apenas o json, não retorne nenhum texto além do json, e também não precisa retornar a area de source code que você sempre retorna, o json não deve conter quebras de linhas. Caso você não encontre o significado da palavra basta retornar a propriedade meanings como uma lista vazia e a propriedade success igual a false. Entrada: ${word}`;
   }
 
   private _generateEnUsPrompt(word: string) {

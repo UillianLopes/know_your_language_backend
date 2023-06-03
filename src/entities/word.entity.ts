@@ -5,7 +5,7 @@ import {
   PrimaryGeneratedColumn,
   Unique,
 } from 'typeorm';
-import { Locale } from '../enums/locale';
+import { ELocale } from '../enums/locale.enum';
 import { Meaning } from './meaning.entity';
 import { Score } from './score.entity';
 import { UserWord } from './user_word.entity';
@@ -21,10 +21,10 @@ export class Word {
 
   @Column({
     type: 'enum',
-    enum: Locale,
-    default: Locale.ptBr,
+    enum: ELocale,
+    default: ELocale.ptBr,
   })
-  locale: Locale;
+  locale: ELocale;
 
   @OneToMany(() => UserWord, (u) => u.word)
   users: UserWord[];
