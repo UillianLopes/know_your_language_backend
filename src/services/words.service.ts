@@ -4,9 +4,11 @@ import { DateTime } from 'luxon';
 import { Repository } from 'typeorm';
 import { ResponseDto } from '../dto/response.dto';
 import {
-  MarkWordAsKnownDto,
-  MarkWordAsKnownPayloadDto,
+  GuessMeaningResponseDto,
+  GuessMeaningPayloadDto,
   WordDto,
+  GuessWordPayloadDto,
+  GuessWordResponseDto,
 } from '../dto/word.dto';
 import { Meaning } from '../entities/meaning.entity';
 import { Score } from '../entities/score.entity';
@@ -22,18 +24,21 @@ const SCORE_REASON = 5;
 @Injectable()
 export class WordsService {
   constructor(
-    @Inject(OpenAIService) private readonly _openAiService: OpenAIService,
-    @InjectRepository(Word) private readonly _wordRepository: Repository<Word>,
+    @Inject(OpenAIService)
+    private readonly _openAiService: OpenAIService,
+    @InjectRepository(Word)
+    private readonly _wordRepository: Repository<Word>,
     @InjectRepository(UserWord)
     private readonly _userWordRepository: Repository<UserWord>,
     @InjectRepository(Score)
     private readonly _scoreRepository: Repository<Score>,
     @InjectRepository(Meaning)
     private readonly _meaningRepository: Repository<Meaning>,
-    @InjectRepository(User) private readonly _userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly _userRepository: Repository<User>,
   ) {}
 
-  async getAUnknownWord(userId: number): Promise<ResponseDto<WordDto>> {
+  async getRandomUnknownWord(userId: number): Promise<ResponseDto<WordDto>> {
     const user = await this._userRepository.findOneBy({
       id: userId,
     });
@@ -56,6 +61,7 @@ export class WordsService {
       .createQueryBuilder('word')
       .where(`word.id NOT IN (${subQuery})`)
       .andWhere('word.cached = true')
+      .orderBy('RANDOM()')
       .getOne();
 
     if (word) {
@@ -79,12 +85,26 @@ export class WordsService {
       );
     }
 
-    const wordDto = await this.getAWordWithMeanings();
+    const wordDto = await this.generateRandomWordWithMeanings();
 
     return ResponseDto.create('Unknown word generated with success.', wordDto);
   }
 
-  async markAsKnow(userId: number, payload: MarkWordAsKnownPayloadDto) {
+  async getRandomUnknownWords(count: number): Promise<ResponseDto<WordDto[]>> {
+    const words: WordDto[] = [];
+
+    for (let i = 0; i < count; i++) {
+      const word = await this.generateRandomWordWithMeanings();
+      words.push(word);
+    }
+
+    return ResponseDto.create('', words);
+  }
+
+  async guessMeaning(
+    userId: number,
+    payload: GuessMeaningPayloadDto,
+  ): Promise<ResponseDto<GuessMeaningResponseDto>> {
     const user = await this._userRepository.findOneBy({
       id: userId,
     });
@@ -149,7 +169,7 @@ export class WordsService {
         await this._userWordRepository.save(userWord);
         return ResponseDto.create(
           'Incorrect answer',
-          MarkWordAsKnownDto.forGuessTheMeaning(
+          new GuessMeaningResponseDto(
             false,
             correctMeaning.id,
             payload.meaningId,
@@ -174,7 +194,7 @@ export class WordsService {
 
     return ResponseDto.create(
       'Completed',
-      MarkWordAsKnownDto.forGuessTheMeaning(
+      new GuessMeaningResponseDto(
         true,
         correctMeaning.id,
         payload.meaningId,
@@ -184,18 +204,70 @@ export class WordsService {
     );
   }
 
-  async loadMoreWords(count: number): Promise<ResponseDto<WordDto[]>> {
-    const words: WordDto[] = [];
+  async guessWord(
+    userId: number,
+    payload: GuessWordPayloadDto,
+  ): Promise<ResponseDto<GuessWordResponseDto>> {
+    const user = await this._userRepository.findOneBy({
+      id: userId,
+    });
 
-    for (let i = 0; i < count; i++) {
-      const word = await this.getAWordWithMeanings();
-      words.push(word);
+    if (!user) {
+      throw new BadRequestException('Invalid user');
     }
 
-    return ResponseDto.create('', words);
+    const word = await this._wordRepository.findOneBy({
+      id: payload.wordId,
+    });
+
+    let userWord = await this._userWordRepository.findOne({
+      where: {
+        word,
+        user,
+      },
+      relations: ['word'],
+    });
+
+    if (!userWord) {
+      userWord = this._userWordRepository.create({
+        word,
+        user,
+        incorrectAttempts: 0,
+        learned: false,
+      });
+
+      await this._userWordRepository.save(userWord);
+    }
+
+    if (payload.force) {
+      userWord.learned = true;
+      await this._userWordRepository.save(userWord);
+      return ResponseDto.create(
+        '',
+        new GuessWordResponseDto(true, 0, userWord.incorrectAttempts),
+      );
+    }
+
+    if (
+      userWord.word.value.trim().toLowerCase() ===
+      payload.word.trim().toLowerCase()
+    ) {
+      return ResponseDto.create(
+        '',
+        new GuessWordResponseDto(true, 10, userWord.incorrectAttempts),
+      );
+    }
+
+    userWord.incorrectAttempts++;
+    await this._userWordRepository.save(userWord);
+
+    return ResponseDto.create(
+      '',
+      new GuessWordResponseDto(false, 0, userWord.incorrectAttempts),
+    );
   }
 
-  private async getAWordWithMeanings(): Promise<WordDto | null> {
+  private async generateRandomWordWithMeanings(): Promise<WordDto | null> {
     const word = await this._wordRepository
       .createQueryBuilder('word')
       .where('word.cached = false')
@@ -213,7 +285,7 @@ export class WordsService {
     );
 
     if (!openAiWord || !openAiWord.success) {
-      return await this.getAWordWithMeanings();
+      return await this.generateRandomWordWithMeanings();
     }
 
     const realMeaning = this._meaningRepository.create({

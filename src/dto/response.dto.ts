@@ -4,13 +4,13 @@ export class ResponseDto<T = any> {
   @ApiProperty({
     name: 'message',
     nullable: true,
-    description: 'This property handles ',
+    description: 'A message to describe the response',
   })
   readonly message: string | null;
 
   @ApiProperty({
     name: 'data',
-    description: 'message',
+    description: 'The data of the response',
     nullable: true,
   })
   readonly data: T | null;

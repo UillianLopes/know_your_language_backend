@@ -42,7 +42,7 @@ export class WordDto {
   }
 }
 
-export class MarkWordAsKnownPayloadDto {
+export class GuessMeaningPayloadDto {
   @ApiProperty()
   readonly wordId: number;
 
@@ -53,21 +53,32 @@ export class MarkWordAsKnownPayloadDto {
   readonly force: boolean | null;
 }
 
-export class MarkWordAsKnownDto {
+export class GuessWordPayloadDto {
   @ApiProperty()
-  correctMeaningId: number | null;
+  readonly wordId: number;
 
   @ApiProperty()
-  meaningId: number | null;
+  readonly word: string;
 
   @ApiProperty()
-  score: number | null;
+  readonly force: boolean | null;
+}
+
+export class GuessMeaningResponseDto {
+  @ApiProperty()
+  readonly correctMeaningId: number | null;
 
   @ApiProperty()
-  completed: boolean;
+  readonly meaningId: number | null;
 
   @ApiProperty()
-  incorrectAttempts: number | null;
+  readonly score: number | null;
+
+  @ApiProperty()
+  readonly completed: boolean;
+
+  @ApiProperty()
+  readonly incorrectAttempts: number | null;
 
   constructor(
     completed: boolean,
@@ -82,20 +93,25 @@ export class MarkWordAsKnownDto {
     this.score = score;
     this.incorrectAttempts = incorrectAttempts;
   }
+}
 
-  static forGuessTheMeaning(
+export class GuessWordResponseDto {
+  @ApiProperty()
+  readonly completed: boolean;
+
+  @ApiProperty()
+  readonly score: number | null;
+
+  @ApiProperty()
+  readonly incorrectAttempts: number | null;
+
+  constructor(
     completed: boolean,
-    correctMeaningId: number | null = null,
-    meaningId: number | null,
     score: number | null = null,
     incorrectAttempts: number | null = null,
   ) {
-    return new MarkWordAsKnownDto(
-      completed,
-      correctMeaningId,
-      meaningId,
-      score,
-      incorrectAttempts,
-    );
+    this.completed = completed;
+    this.score = score;
+    this.incorrectAttempts = incorrectAttempts;
   }
 }

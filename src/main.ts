@@ -9,8 +9,8 @@ import * as passport from 'passport';
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     httpsOptions: {
-      cert: fs.readFileSync('ssl/local.knowyourlanguage.com.crt'),
-      key: fs.readFileSync('ssl/local.knowyourlanguage.com.key'),
+      cert: fs.readFileSync(process.env.SSL_CERT_FILE_PATH),
+      key: fs.readFileSync(process.env.SSL_CERT_KEY_PATH),
     },
   });
 
