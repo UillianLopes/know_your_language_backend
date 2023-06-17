@@ -13,6 +13,7 @@ import { UsersService } from './services/users.service';
 import { WordsService } from './services/words.service';
 import { OpenAIService } from './services/openai.service';
 import { TokenGuard } from './guards/token.guard';
+import { RankingsService } from './services/rankings.service';
 
 @Module({
   imports: [
@@ -38,7 +39,13 @@ import { TokenGuard } from './guards/token.guard';
     }),
     TypeOrmModule.forFeature([User, Word, Meaning, Score, UserWord]),
   ],
-  providers: [TokenGuard, UsersService, WordsService, OpenAIService],
+  providers: [
+    TokenGuard,
+    UsersService,
+    WordsService,
+    RankingsService,
+    OpenAIService,
+  ],
   controllers: [UsersController, WordsController, RankingsController],
 })
 export class AppModule {}

@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { User } from './user.entity';
 import { Word } from './word.entity';
 
@@ -15,9 +15,9 @@ export class Score {
   })
   timestamp: Date;
 
-  @OneToMany(() => User, (user) => user.scores)
+  @ManyToOne(() => User, (user) => user.scores)
   user: User;
 
-  @OneToMany(() => Word, (word) => word.scores)
+  @ManyToOne(() => Word, (word) => word.scores)
   word: Word;
 }

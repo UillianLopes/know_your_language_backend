@@ -1,6 +1,7 @@
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Word } from './word.entity';
 import { User } from './user.entity';
+import { EGameMode } from '../enums/game-mode.enum';
 
 @Entity()
 export class UserWord {
@@ -18,4 +19,11 @@ export class UserWord {
 
   @Column()
   learned: boolean;
+
+  @Column({
+    type: 'enum',
+    enum: EGameMode,
+    default: EGameMode.guessTheMeaning,
+  })
+  gameMode: EGameMode;
 }

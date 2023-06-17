@@ -30,6 +30,6 @@ export class User {
   @Column({ nullable: true })
   picture: string | null;
 
-  @ManyToOne(() => Score, (score) => score.user)
+  @OneToMany(() => Score, (score) => score.user)
   scores: Score[];
 }
