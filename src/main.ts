@@ -5,6 +5,7 @@ import * as fs from 'fs';
 import { config } from 'dotenv';
 import * as session from 'express-session';
 import * as passport from 'passport';
+import { ValidationPipe } from '@nestjs/common';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -15,11 +16,13 @@ async function bootstrap() {
   });
 
   app.setGlobalPrefix('api/v1');
+  app.useGlobalPipes(new ValidationPipe());
   const swaggerConfig = new DocumentBuilder()
     .setTitle('Know Your Language API')
     .setVersion('1.0')
     .addTag('release-1.0')
     .addCookieAuth('connect.sid')
+    .addBearerAuth()
     .build();
 
   app.use(
@@ -44,4 +47,5 @@ async function bootstrap() {
 config({
   path: 'environments/.env',
 });
+
 bootstrap();

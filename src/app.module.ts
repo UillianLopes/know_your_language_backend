@@ -14,6 +14,11 @@ import { WordsService } from './services/words.service';
 import { OpenAIService } from './services/openai.service';
 import { TokenGuard } from './guards/token.guard';
 import { RankingsService } from './services/rankings.service';
+import { JwtModule } from '@nestjs/jwt';
+import * as process from 'process';
+import { JwtStrategy } from './strategies/jwt.strategy';
+import { AuthService } from './services/auth.service';
+import { AuthController } from './controllers/auth.controller';
 
 @Module({
   imports: [
@@ -26,16 +31,31 @@ import { RankingsService } from './services/rankings.service';
           username: process.env.DB_USERNAME,
           password: process.env.DB_PASSWORD,
           database: process.env.DB_NAME,
-          synchronize: true,
-          logging: false,
+          logging: true,
           entities: [User, Word, Meaning, Score, UserWord],
-          migrations: [],
         };
       },
     }),
+    PassportModule,
     PassportModule.register({
       session: true,
       defaultStrategy: 'token',
+    }),
+    JwtModule.registerAsync({
+      useFactory: () => {
+        return {
+          secret: process.env.JWT_SECRET,
+          signOptions: {
+            audience: process.env.JWT_AUDIENCE,
+            issuer: process.env.JWT_ISSUER,
+            expiresIn: process.env.JWT_EXPIRES_IN,
+          },
+          verifyOptions: {
+            audience: process.env.JWT_AUDIENCE,
+            issuer: process.env.JWT_ISSUER,
+          },
+        };
+      },
     }),
     TypeOrmModule.forFeature([User, Word, Meaning, Score, UserWord]),
   ],
@@ -45,7 +65,14 @@ import { RankingsService } from './services/rankings.service';
     WordsService,
     RankingsService,
     OpenAIService,
+    AuthService,
+    JwtStrategy,
   ],
-  controllers: [UsersController, WordsController, RankingsController],
+  controllers: [
+    UsersController,
+    WordsController,
+    RankingsController,
+    AuthController,
+  ],
 })
 export class AppModule {}

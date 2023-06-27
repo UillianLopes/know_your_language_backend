@@ -1,7 +1,6 @@
 export enum ERankingType {
-  dayly = 'dayly',
+  daily = 'daily',
   weekly = 'weekly',
   monthly = 'monthly',
   yearly = 'yearly',
-  gneral = 'general',
 }

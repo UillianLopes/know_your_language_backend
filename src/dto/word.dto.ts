@@ -115,3 +115,12 @@ export class GuessWordResponseDto {
     this.incorrectAttempts = incorrectAttempts;
   }
 }
+
+export class GetKnowWordsDto {
+  @ApiProperty()
+  readonly page: number;
+  @ApiProperty()
+  readonly size: number;
+  @ApiProperty()
+  readonly search: string | null;
+}

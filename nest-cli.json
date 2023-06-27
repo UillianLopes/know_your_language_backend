@@ -5,8 +5,9 @@
   "compilerOptions": {
     "deleteOutDir": true,
     "assets": [
-      "../ssl",
-      "../environments"
+      { "include": "../ssl", "outDir": "/ssl" },
+      { "include": "../environments", "outDir": "/environments" },
+      { "include": "../prompts", "outDir": "/prompts" }
     ]
   }
 }

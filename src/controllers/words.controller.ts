@@ -4,32 +4,36 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
-import { ResponseDto } from '../dto/response.dto';
-import { OkResponseDto } from '../decorators/single-response-dto.decorator';
+import { ResponseDto } from '@kyl/dto/response.dto';
+import { OkResponseDto } from '@kyl/decorators/single-response-dto.decorator';
 import {
   WordDto,
   GuessMeaningPayloadDto,
   GuessWordPayloadDto,
   GuessMeaningResponseDto,
   GuessWordResponseDto,
-} from '../dto/word.dto';
-import { TokenGuard } from '../guards/token.guard';
-import { WordsService } from '../services/words.service';
+  GetKnowWordsDto,
+} from '@kyl/dto/word.dto';
+import { TokenGuard } from '@kyl/guards/token.guard';
+import { WordsService } from '@kyl/services/words.service';
 import { Request } from 'express';
-import { EGameMode } from '../enums/game-mode.enum';
-import { ApiTags } from '@nestjs/swagger';
+import { EGameMode } from '@kyl/enums/game-mode.enum';
+import { ApiBearerAuth, ApiParam, ApiTags } from '@nestjs/swagger';
 
 @Controller('words')
 @ApiTags('Words')
+@ApiBearerAuth()
 export class WordsController {
   constructor(private readonly _wordsService: WordsService) {}
 
   @Get('unknown/:gameMode')
   @UseGuards(TokenGuard)
   @OkResponseDto(WordDto)
+  @ApiParam({ name: 'gameMode', enum: EGameMode })
   async unknownWord(
     @Param('gameMode') gameMode: EGameMode,
     @Req() request: Request,
@@ -63,8 +67,8 @@ export class WordsController {
   @Get('known')
   @UseGuards(TokenGuard)
   @OkResponseDto(WordDto)
-  async knownWords(@Req() request: Request) {
+  async knownWords(@Req() request: Request, @Query() query: GetKnowWordsDto) {
     const user = request.user;
-    return [];
+    return this._wordsService.knownWords(user['id'], query);
   }
 }

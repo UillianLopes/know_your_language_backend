@@ -9,6 +9,7 @@ import {
   WordDto,
   GuessWordPayloadDto,
   GuessWordResponseDto,
+  GetKnowWordsDto,
 } from '../dto/word.dto';
 import { Meaning } from '../entities/meaning.entity';
 import { Score } from '../entities/score.entity';
@@ -56,6 +57,7 @@ export class WordsService {
       .leftJoin('w.users', 'us')
       .leftJoin('us.user', 'u')
       .where(`u.id = ${userId}`)
+      .andWhere(`w.locale = '${user.locale}'`)
       .andWhere(`us.learned = true`)
       .andWhere('w.cached = true')
       .andWhere(`us.gameMode = '${gameMode}'`)
@@ -63,10 +65,11 @@ export class WordsService {
       .getQuery();
 
     let word = await this._wordRepository
-      .createQueryBuilder('word')
-      .innerJoin('word.users', 'uw')
-      .where(`word.id NOT IN (${subQuery})`)
-      .andWhere(`word.cached = true`)
+      .createQueryBuilder('w')
+      .innerJoin('w.users', 'uw')
+      .where(`w.id NOT IN (${subQuery})`)
+      .andWhere(`w.locale = '${user.locale}'`)
+      .andWhere(`w.cached = true`)
       .andWhere(`uw.gameMode = '${gameMode.toString()}'`)
       .andWhere(`uw.userId = ${userId}`)
       .orderBy('RANDOM()')
@@ -80,8 +83,12 @@ export class WordsService {
         .getMany();
 
       const userWord = await this._userWordRepository.findOneBy({
-        user,
-        word,
+        user: {
+          id: user.id,
+        },
+        word: {
+          id: word.id,
+        },
         gameMode,
       });
 
@@ -163,8 +170,12 @@ export class WordsService {
     let points = 0;
 
     let userWord = await this._userWordRepository.findOneBy({
-      word,
-      user,
+      word: {
+        id: word.id,
+      },
+      user: {
+        id: user.id,
+      },
     });
 
     if (!userWord) {
@@ -253,8 +264,12 @@ export class WordsService {
 
     let userWord = await this._userWordRepository.findOne({
       where: {
-        word,
-        user,
+        word: {
+          id: word.id,
+        },
+        user: {
+          id: word.id,
+        },
       },
       relations: ['word'],
     });
@@ -301,18 +316,24 @@ export class WordsService {
 
   async knownWords(
     userId: number,
-    page: number,
+    query: GetKnowWordsDto,
   ): Promise<ListResponseDto<WordDto>> {
-    let queryBuilder = this._wordRepository
+    const queryBuilder = this._wordRepository
       .createQueryBuilder('word')
       .innerJoin('word.users', 'uw')
       .where(`uw.userId = ${userId}`)
-      .andWhere(`uw.learned = true`);
+      .andWhere(`uw.learned = true`)
+      .orderBy('word.value', 'ASC')
+      .skip((query.page - 1) * query.size)
+      .take(query.size);
 
-    const words = await queryBuilder.getMany();
+    const words = (await queryBuilder.getMany()) ?? [];
 
-
-    return ListResponseDto.withoutMessage([] as WordDto[], 10, 10);
+    return ListResponseDto.withoutMessage(
+      words.map((word) => WordDto.fromEntity(word)),
+      10,
+      10,
+    );
   }
 
   private async generateRandomWordWithMeanings(): Promise<Word | null> {

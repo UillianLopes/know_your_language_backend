@@ -6,6 +6,12 @@ import { RankingDto } from '../dto/ranking.dto';
 import { ResponseDto } from '../dto/response.dto';
 import { ERankingType } from '../enums/ranking-type.enum';
 
+const MOCK: RankingDto[] = [
+  new RankingDto('User 1', 10),
+  new RankingDto('User 1', 10),
+  new RankingDto('User 1', 10),
+  new RankingDto('User 1', 10),
+];
 @Injectable()
 export class RankingsService {
   constructor(
@@ -20,7 +26,7 @@ export class RankingsService {
       .where('s.value > 0');
 
     switch (ranking) {
-      case ERankingType.dayly:
+      case ERankingType.daily:
         queryBuilder = queryBuilder.andWhere(
           `s.timestamp > date_trunc('day', timezone('utc', NOW()))`,
         );
@@ -55,9 +61,9 @@ export class RankingsService {
       return ResponseDto.create('No scores found', []);
     }
 
-    return ResponseDto.create(
-      'Scores found',
-      response.map((r) => new RankingDto(r.name, r.value)),
-    );
+    return ResponseDto.create('Scores found', [
+      ...response.map((r) => new RankingDto(r.name, parseInt(r.value))),
+      ...MOCK,
+    ]);
   }
 }

@@ -1,13 +1,18 @@
 import { ExecutionContext, Inject, Injectable } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OAuth2Client } from 'google-auth-library';
-import { UsersService } from '../services/users.service';
+import { UsersService } from '@kyl/services/users.service';
 import { Request } from 'express';
+import { JwtService } from '@nestjs/jwt';
+import { EAuthProvider } from '@kyl/enums/auth-provider.enum';
+import * as process from 'process';
+import { ELocale } from '@kyl/enums/locale.enum';
 
 @Injectable()
 export class TokenGuard extends AuthGuard('token') {
   constructor(
     @Inject(UsersService) private readonly _usersService: UsersService,
+    private readonly _jwtService: JwtService,
   ) {
     super();
   }
@@ -23,11 +28,46 @@ export class TokenGuard extends AuthGuard('token') {
           return await this.handleGoogleAuth(request);
 
         default:
-          return false;
+          return await this.handleJwt(request);
       }
     }
 
     return false;
+  }
+
+  async handleJwt(request: Request): Promise<boolean> {
+    const authorizationArray = request.headers.authorization.split(' ');
+
+    if (!authorizationArray || authorizationArray.length < 2) {
+      return false;
+    }
+
+    const [type, token] = authorizationArray;
+
+    if (type !== 'Bearer') {
+      return false;
+    }
+
+    const payload = await this._jwtService.verifyAsync(token, {
+      secret: process.env.JWT_SECRET,
+      audience: process.env.JWT_AUDIENCE,
+      issuer: process.env.JWT_ISSUER,
+    });
+
+    if (!payload) {
+      return false;
+    }
+
+    request.user = {
+      id: payload.sub,
+      name: payload.name,
+      email: payload.email,
+      picture: payload.picture,
+      provider: payload.provider,
+      locale: payload.locale,
+    };
+
+    return true;
   }
 
   async handleGoogleAuth(request: Request): Promise<boolean> {
@@ -66,7 +106,8 @@ export class TokenGuard extends AuthGuard('token') {
         name: payload.name,
         email: payload.email,
         picture: payload.picture,
-        provider: 'google',
+        provider: EAuthProvider.self,
+        locale: (payload.locale ?? ELocale.enUs) as ELocale,
       });
     }
 
@@ -76,6 +117,7 @@ export class TokenGuard extends AuthGuard('token') {
       email: userEntity.email,
       provider: userEntity.provider,
       picture: userEntity.picture,
+      local: userEntity.locale,
     };
 
     return true;

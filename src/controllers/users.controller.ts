@@ -1,14 +1,15 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { Request } from 'express';
 
-import { OkResponseDto } from '../decorators/single-response-dto.decorator';
-import { UserDto } from '../dto/user.dto';
-import { TokenGuard } from '../guards/token.guard';
-import { ResponseDto } from '../dto/response.dto';
+import { OkResponseDto } from '@kyl/decorators/single-response-dto.decorator';
+import { UserDto } from '@kyl/dto/user.dto';
+import { TokenGuard } from '@kyl/guards/token.guard';
+import { ResponseDto } from '@kyl/dto/response.dto';
 
 @Controller('users')
 @ApiTags('Users')
+@ApiBearerAuth()
 export class UsersController {
   @Get('profile')
   @UseGuards(TokenGuard)

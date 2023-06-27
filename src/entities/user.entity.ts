@@ -2,12 +2,14 @@ import {
   Column,
   Entity,
   Index,
-  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Score } from './score.entity';
 import { UserWord } from './user_word.entity';
+import * as argon2 from 'argon2';
+import { EAuthProvider } from '../enums/auth-provider.enum';
+import { ELocale } from '@kyl/enums/locale.enum';
 
 @Entity()
 export class User {
@@ -24,12 +26,30 @@ export class User {
   @OneToMany(() => UserWord, (word) => word.user)
   words: UserWord[];
 
-  @Column()
-  provider: string;
+  @Column({
+    type: 'enum',
+    enum: EAuthProvider,
+    default: EAuthProvider.self,
+  })
+  provider: EAuthProvider;
 
   @Column({ nullable: true })
   picture: string | null;
 
   @OneToMany(() => Score, (score) => score.user)
   scores: Score[];
+
+  @Column({ nullable: true })
+  password: string | null;
+
+  @Column({
+    type: 'enum',
+    enum: ELocale,
+    default: ELocale.enUs,
+  })
+  locale: ELocale;
+
+  async checkPassword(password: string): Promise<boolean> {
+    return await argon2.verify(this.password, password);
+  }
 }
