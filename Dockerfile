@@ -1,8 +1,5 @@
 FROM node:20-buster AS build
 
-ARG NODE_ENV=prod
-ENV NODE_ENV=${NODE_ENV}
-
 WORKDIR /usr/src/app
 
 COPY package*.json ./
@@ -20,11 +17,6 @@ RUN npm run build
 
 FROM node:20-buster as deployment
 
-ARG NODE_ENV=prod
-
-ENV NODE_ENV=${NODE_ENV}
-ENV PORT="3000"
-
 WORKDIR /usr/src/app
 
 COPY package*.json ./
@@ -41,4 +33,3 @@ COPY . .
 COPY --from=build /usr/src/app/dist ./dist
 
 CMD ["node", "dist/src/main"]
-EXPOSE 3000
