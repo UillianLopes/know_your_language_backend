@@ -47,6 +47,8 @@ async function bootstrap() {
   app.use(passport.initialize());
   app.use(passport.session());
 
+  console.log('NODE ENV -> ', process.env);
+
   const document = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/v1/swagger', app, document);
   await app.listen(process.env.PORT ?? 3000);
