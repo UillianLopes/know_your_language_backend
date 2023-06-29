@@ -5,7 +5,7 @@ import * as fs from 'fs';
 import { config } from 'dotenv';
 import * as session from 'express-session';
 import * as passport from 'passport';
-import { ValidationPipe } from '@nestjs/common';
+import { NestApplicationOptions, ValidationPipe } from '@nestjs/common';
 import * as process from 'process';
 
 const ENV_FILES = {
@@ -14,13 +14,22 @@ const ENV_FILES = {
   stage: 'environments/stage.env',
 };
 
+const env = process.env.NODE_ENV;
+
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    httpsOptions: {
-      cert: fs.readFileSync(process.env.SSL_CERT_FILE_PATH),
-      key: fs.readFileSync(process.env.SSL_CERT_KEY_PATH),
-    },
-  });
+  let options: NestApplicationOptions = {};
+
+  if (env === 'dev') {
+    options = {
+      ...options,
+      httpsOptions: {
+        cert: fs.readFileSync(process.env.SSL_CERT_FILE_PATH),
+        key: fs.readFileSync(process.env.SSL_CERT_KEY_PATH),
+      },
+    };
+  }
+
+  const app = await NestFactory.create(AppModule, options);
 
   app.setGlobalPrefix('api/v1');
   app.useGlobalPipes(new ValidationPipe());
@@ -53,7 +62,7 @@ async function bootstrap() {
 }
 
 config({
-  path: ENV_FILES[process.env.NODE_ENV],
+  path: ENV_FILES[process.env.NODE_ENV] ?? ENV_FILES.dev,
 });
 
 bootstrap();
