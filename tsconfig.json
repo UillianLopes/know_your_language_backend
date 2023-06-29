@@ -20,7 +20,7 @@
     "paths": {
       "@kyl/*": ["src/*"],
       "@kyl/migrations": ["migrations/*"],
-    }
+    },
   },
 
 }

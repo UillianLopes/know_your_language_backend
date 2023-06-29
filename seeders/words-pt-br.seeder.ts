@@ -5,6 +5,8 @@ import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
 import * as wordsPt from 'words-pt';
 import { Seed } from '@kyl/entities/seed.entity';
+import * as process from 'process';
+import { shuffle } from '@kyl/utils/shuffle.function';
 
 export default class WordsPtBr1687698213 implements Seeder {
   readonly name = 'WordsPtBr1687698213';
@@ -12,6 +14,7 @@ export default class WordsPtBr1687698213 implements Seeder {
 
   async run(dataSource: DataSource): Promise<any> {
     try {
+      console.log('STARTING TO SEED THE DATABASE WITH PT-BR WORDS');
       const wordsRepository = dataSource.getRepository(Word);
       const seedRepository = dataSource.getRepository(Seed);
       let seed = await seedRepository.findOneBy({
@@ -30,7 +33,16 @@ export default class WordsPtBr1687698213 implements Seeder {
             return;
           }
           const words = wordsPt.getArray();
-          resolve(words.filter((d) => d && d.length > 4 && !d.includes('-')));
+
+          if (process.env.NODE_ENV === 'prod') {
+            resolve(
+              shuffle(
+                words.filter((d) => d && d.length > 4 && !d.includes('-')),
+              ).filter((_, i) => i < 1000),
+            );
+          } else {
+            resolve(words.filter((d) => d && d.length > 4 && !d.includes('-')));
+          }
         });
       });
 

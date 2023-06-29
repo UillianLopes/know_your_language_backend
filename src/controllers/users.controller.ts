@@ -1,6 +1,6 @@
 import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Request } from 'express';
+import { Request, Express } from 'express';
 
 import { OkResponseDto } from '@kyl/decorators/single-response-dto.decorator';
 import { UserDto } from '@kyl/dto/user.dto';

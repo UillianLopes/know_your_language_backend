@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Score } from './score.entity';
 import { UserWord } from './user_word.entity';
-import * as argon2 from 'argon2';
+import * as bcrypt from 'bcryptjs';
 import { EAuthProvider } from '../enums/auth-provider.enum';
 import { ELocale } from '@kyl/enums/locale.enum';
 
@@ -50,6 +50,6 @@ export class User {
   locale: ELocale;
 
   async checkPassword(password: string): Promise<boolean> {
-    return await argon2.verify(this.password, password);
+    return await bcrypt.compare(password, this.password);
   }
 }

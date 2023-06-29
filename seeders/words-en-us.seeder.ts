@@ -5,6 +5,8 @@ import { DataSource } from 'typeorm';
 import { Seeder } from 'typeorm-extension';
 import { Seed } from '@kyl/entities/seed.entity';
 import * as fs from 'fs';
+import * as process from 'process';
+import { shuffle } from '@kyl/utils/shuffle.function';
 
 export default class WordsEnUs1687705796 implements Seeder {
   readonly name = 'WordsEnUs1687705796';
@@ -12,6 +14,7 @@ export default class WordsEnUs1687705796 implements Seeder {
 
   async run(dataSource: DataSource): Promise<any> {
     try {
+      console.log('STARTING TO SEED THE DATABASE WITH EN-US WORDS');
       const wordsRepository = dataSource.getRepository(Word);
       const seedRepository = dataSource.getRepository(Seed);
 
@@ -37,8 +40,11 @@ export default class WordsEnUs1687705796 implements Seeder {
         if (!parsedData) {
           return [];
         }
-
-        return Object.keys(parsedData).filter((d) => d.length > 4);
+        const words = Object.keys(parsedData).filter((d) => d.length > 4);
+        if (process.env.NODE_ENV === 'prod') {
+          return shuffle(words).filter((_, i) => i < 1000);
+        }
+        return words;
       })();
 
       if (!(result instanceof Array<string>)) {

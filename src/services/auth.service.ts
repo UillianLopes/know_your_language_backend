@@ -11,7 +11,7 @@ import { TokenDto } from '../dto/token.dto';
 import { JwtService } from '@nestjs/jwt';
 import * as process from 'process';
 import { SignUpDto } from '../dto/sign-up.dto';
-import * as argon2 from 'argon2';
+import * as bcrypt from 'bcryptjs';
 import { EAuthProvider } from '../enums/auth-provider.enum';
 import { UserDto } from '../dto/user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -36,7 +36,7 @@ export class AuthService {
       );
     }
 
-    const hashPassword = await argon2.hash(command.password);
+    const hashPassword = await bcrypt.hash(command.password, 10);
 
     const user = await this._userRepository.create({
       email: command.email,

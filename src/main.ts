@@ -6,6 +6,13 @@ import { config } from 'dotenv';
 import * as session from 'express-session';
 import * as passport from 'passport';
 import { ValidationPipe } from '@nestjs/common';
+import * as process from 'process';
+
+const ENV_FILES = {
+  dev: 'environments/dev.env',
+  prod: 'environments/prod.env',
+  stage: 'environments/stage.env',
+};
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -44,8 +51,9 @@ async function bootstrap() {
   SwaggerModule.setup('api/v1/swagger', app, document);
   await app.listen(3000);
 }
+
 config({
-  path: 'environments/.env',
+  path: ENV_FILES[process.env.NODE_ENV],
 });
 
 bootstrap();

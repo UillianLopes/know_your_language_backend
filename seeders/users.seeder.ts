@@ -9,8 +9,7 @@ const USERS: Partial<User>[] = [
     name: 'Uillian Lopes',
     email: 'uilliansl+admin@outlook.com',
     provider: EAuthProvider.self,
-    password:
-      '$argon2id$v=19$m=65536,t=3,p=4$uFkn/1HSvTi1lD85QlFr5Q$/fwoa5HSHrHWCQ6HWwn8Zc79prsCkl5PDvD5ovVjtyQ',
+    password: '$2b$10$mdp5aFvMJFt4veTGAALxD.vCn6BoNkg2qzx79Q6l1Thivb839s9Ye',
   },
 ];
 
