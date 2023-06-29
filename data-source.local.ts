@@ -1,22 +1,21 @@
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
 import { config } from 'dotenv';
-
-const env = config({
+const envConfig = config({
   path: 'environments/.env',
 });
 
 const options: DataSourceOptions & SeederOptions = {
   type: 'postgres',
-  host: env.parsed.DB_HOST,
-  port: parseInt(env.parsed.DB_PORT),
-  username: env.parsed.DB_USERNAME,
-  password: env.parsed.DB_PASSWORD,
-  database: env.parsed.DB_NAME,
+  host: envConfig.parsed.DB_HOST,
+  port: parseInt(envConfig.parsed.DB_PORT),
+  username: envConfig.parsed.DB_USERNAME,
+  password: envConfig.parsed.DB_PASSWORD,
+  database: envConfig.parsed.DB_NAME,
   entities: ['src/entities/*.entity.ts'],
   migrations: ['migrations/*.ts'],
   migrationsTableName: 'migration',
-  seeds: ['seeders/*.ts'],
+  seeds: [UsersSeeder1687700404, WordsPtBr1687698213, WordsPtBr1687698213],
 };
 
 const devDataSource = new DataSource(options);
