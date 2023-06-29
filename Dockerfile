@@ -35,4 +35,3 @@ COPY --from=build /usr/src/app/dist ./dist
 EXPOSE 3000
 ENV NODE_ENV=prod
 CMD ["npm", "run", "start:prod"]
-
