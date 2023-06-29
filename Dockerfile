@@ -33,3 +33,4 @@ COPY . .
 COPY --from=build /usr/src/app/dist ./dist
 
 CMD ["node", "dist/src/main"]
+EXPOSE 3000
