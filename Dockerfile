@@ -21,7 +21,10 @@ RUN npm run build
 FROM node:20-buster as deployment
 
 ARG NODE_ENV=prod
+ARG PORT=3000
+
 ENV NODE_ENV=${NODE_ENV}
+ENV PORT=${PORT}
 
 WORKDIR /usr/src/app
 
@@ -37,5 +40,5 @@ RUN npm install --omit=dev
 COPY . .
 
 COPY --from=build /usr/src/app/dist ./dist
-
+EXPOSE ${PORT}
 CMD ["node", "dist/src/main"]
