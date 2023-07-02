@@ -97,17 +97,24 @@ export class TokenGuard extends AuthGuard('token') {
     let userEntity = await this._usersService.findByEmail(payload.email);
 
     if (userEntity) {
-      userEntity.picture != payload.picture &&
-        (await this._usersService.update(userEntity.id, {
+      if (payload.picture && payload.picture !== userEntity.picture) {
+        await this._usersService.update(userEntity.id, {
           picture: userEntity.picture,
-        }));
+        });
+      }
+
+      if (!userEntity.locale && payload.locale) {
+        await this._usersService.update(userEntity.id, {
+          locale: this._handleLocale(userEntity.locale),
+        });
+      }
     } else {
       userEntity = await this._usersService.create({
         name: payload.name,
         email: payload.email,
         picture: payload.picture,
         provider: EAuthProvider.self,
-        locale: (payload.locale ?? ELocale.enUs) as ELocale,
+        locale: this._handleLocale(payload.locale),
       });
     }
 
@@ -117,9 +124,17 @@ export class TokenGuard extends AuthGuard('token') {
       email: userEntity.email,
       provider: userEntity.provider,
       picture: userEntity.picture,
-      local: userEntity.locale,
+      local: this._handleLocale(userEntity.locale),
     };
 
     return true;
+  }
+
+  private _handleLocale(locale: string): ELocale {
+    if (!locale || !locale.startsWith('pt')) {
+      return ELocale.enUs;
+    }
+
+    return ELocale.ptBr;
   }
 }

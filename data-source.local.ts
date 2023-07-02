@@ -4,15 +4,9 @@ import { config } from 'dotenv';
 import UsersSeeder1687700404 from './seeders/users.seeder';
 import WordsPtBr1687698213 from './seeders/words-pt-br.seeder';
 import WordsEnUs1687705796 from './seeders/words-en-us.seeder';
-import * as process from 'process';
-const ENV_FILES = {
-  dev: 'environments/dev.env',
-  prod: 'environments/prod.env',
-  stage: 'environments/stage.env',
-};
 
 const envConfig = config({
-  path: ENV_FILES[process.env.NODE_ENV],
+  path: 'environments/dev.env',
 });
 
 const options: DataSourceOptions & SeederOptions = {

@@ -11,7 +11,6 @@ import * as process from 'process';
 const ENV_FILES = {
   dev: 'environments/dev.env',
   prod: 'environments/prod.env',
-  stage: 'environments/stage.env',
 };
 
 async function bootstrap() {

@@ -6,7 +6,6 @@ import { SignUpDto } from '@kyl/dto/sign-up.dto';
 import { OkResponseDto } from '@kyl/decorators/single-response-dto.decorator';
 import { TokenDto } from '@kyl/dto/token.dto';
 import { UserDto } from '@kyl/dto/user.dto';
-import * as fs from 'fs';
 
 @Controller('auth')
 @ApiTags('Auth')
@@ -16,8 +15,6 @@ export class AuthController {
   @Put('sign-in')
   @OkResponseDto(TokenDto)
   async signIn(@Body() signIn: SignInDto) {
-    const dir = fs.readdirSync('./');
-    console.log(JSON.stringify(dir));
     return this._authService.signIn(signIn);
   }
 
