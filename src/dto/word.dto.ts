@@ -83,13 +83,13 @@ export class GuessMeaningResponseDto {
   constructor(
     completed: boolean,
     correctMeaningId: number | null = null,
-    meaingId: number | null,
+    meaningId: number | null,
     score: number | null = null,
     incorrectAttempts: number | null = null,
   ) {
     this.completed = completed;
     this.correctMeaningId = correctMeaningId;
-    this.meaningId = meaingId;
+    this.meaningId = meaningId;
     this.score = score;
     this.incorrectAttempts = incorrectAttempts;
   }
@@ -116,7 +116,7 @@ export class GuessWordResponseDto {
   }
 }
 
-export class GetKnowWordsDto {
+export class GetKnownWordsDto {
   @ApiProperty()
   readonly page: number;
   @ApiProperty()

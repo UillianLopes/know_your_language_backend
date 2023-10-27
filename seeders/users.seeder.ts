@@ -3,6 +3,7 @@ import { DataSource } from 'typeorm';
 import { Seed } from '@kyl/entities/seed.entity';
 import { User } from '@kyl/entities/user.entity';
 import { EAuthProvider } from '@kyl/enums/auth-provider.enum';
+import { ELocale } from '@kyl/enums/locale.enum';
 
 const USERS: Partial<User>[] = [
   {
@@ -10,6 +11,7 @@ const USERS: Partial<User>[] = [
     email: 'uilliansl+admin@outlook.com',
     provider: EAuthProvider.self,
     password: '$2b$10$mdp5aFvMJFt4veTGAALxD.vCn6BoNkg2qzx79Q6l1Thivb839s9Ye',
+    locale: ELocale.ptBr,
   },
 ];
 

@@ -16,7 +16,7 @@ import {
   GuessWordPayloadDto,
   GuessMeaningResponseDto,
   GuessWordResponseDto,
-  GetKnowWordsDto,
+  GetKnownWordsDto,
 } from '@kyl/dto/word.dto';
 import { TokenGuard } from '@kyl/guards/token.guard';
 import { WordsService } from '@kyl/services/words.service';
@@ -67,7 +67,7 @@ export class WordsController {
   @Get('known')
   @UseGuards(TokenGuard)
   @OkResponseDto(WordDto)
-  async knownWords(@Req() request: Request, @Query() query: GetKnowWordsDto) {
+  async knownWords(@Req() request: Request, @Query() query: GetKnownWordsDto) {
     const user = request.user;
     return this._wordsService.knownWords(user['id'], query);
   }

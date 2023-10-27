@@ -9,7 +9,7 @@ import {
   WordDto,
   GuessWordPayloadDto,
   GuessWordResponseDto,
-  GetKnowWordsDto,
+  GetKnownWordsDto,
 } from '../dto/word.dto';
 import { Meaning } from '../entities/meaning.entity';
 import { Score } from '../entities/score.entity';
@@ -316,7 +316,7 @@ export class WordsService {
 
   async knownWords(
     userId: number,
-    query: GetKnowWordsDto,
+    query: GetKnownWordsDto,
   ): Promise<ListResponseDto<WordDto>> {
     const queryBuilder = this._wordRepository
       .createQueryBuilder('word')

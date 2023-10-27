@@ -10,13 +10,13 @@ import { Controller, Get, Param, UseGuards } from '@nestjs/common';
 @ApiTags('Rankings')
 @ApiBearerAuth()
 export class RankingsController {
-  constructor(private readonly rankingsService: RankingsService) {}
+  constructor(private readonly _rankingsService: RankingsService) {}
 
   @Get(':rankingType')
   @UseGuards(TokenGuard)
   @OkListResponseDto(RankingDto)
   @ApiQuery({ name: 'rankingType', enum: ERankingType })
   async getRankings(@Param('rankingType') rankingType: ERankingType) {
-    return await this.rankingsService.getRankings(rankingType);
+    return await this._rankingsService.getRankings(rankingType);
   }
 }

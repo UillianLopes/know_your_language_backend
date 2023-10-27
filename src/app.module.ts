@@ -19,6 +19,7 @@ import * as process from 'process';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthService } from './services/auth.service';
 import { AuthController } from './controllers/auth.controller';
+import { Prompt } from '@kyl/entities/prompt.entity';
 
 @Module({
   imports: [
@@ -32,7 +33,7 @@ import { AuthController } from './controllers/auth.controller';
           password: process.env.DB_PASSWORD,
           database: process.env.DB_NAME,
           logging: true,
-          entities: [User, Word, Meaning, Score, UserWord],
+          entities: [User, Word, Meaning, Score, UserWord, Prompt],
         };
       },
     }),
@@ -57,7 +58,7 @@ import { AuthController } from './controllers/auth.controller';
         };
       },
     }),
-    TypeOrmModule.forFeature([User, Word, Meaning, Score, UserWord]),
+    TypeOrmModule.forFeature([User, Word, Meaning, Score, UserWord, Prompt]),
   ],
   providers: [
     TokenGuard,

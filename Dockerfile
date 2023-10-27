@@ -27,6 +27,8 @@ RUN apt-get update && apt-get install -y \
     g++
 
 RUN npm install --omit=dev
+RUN npm run db:mig:gen
+RUN npm run db:seed
 
 COPY . .
 
