@@ -13,6 +13,8 @@ RUN npm install
 
 COPY . .
 
+RUN echo $DB_HOST
+
 RUN npm run build
 RUN npm run db:mig:run
 RUN npm run db:seed
