@@ -5,10 +5,11 @@ import UsersSeeder1687700404 from './seeders/users.seeder';
 import WordsPtBr1687698213 from './seeders/words-pt-br.seeder';
 import WordsEnUs1687705796 from './seeders/words-en-us.seeder';
 import PromptsSeeder1690164786 from './seeders/prompts.seeder';
+import * as process from 'process';
 
 let env: { [key: string]: string } = {};
 
-if (process.env?.DB_HOST) {
+if (process.env?.NODE_ENV === 'prod') {
   env = process.env;
 } else {
   const envConfig = config({
@@ -17,6 +18,8 @@ if (process.env?.DB_HOST) {
 
   env = envConfig.parsed;
 }
+
+console.log(process.env);
 
 const options: DataSourceOptions & SeederOptions = {
   type: 'postgres',
