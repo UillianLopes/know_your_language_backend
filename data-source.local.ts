@@ -21,8 +21,7 @@ const envOptions = {
 
 const env: { [key: string]: string } = envOptions[nodeEnv]();
 
-console.log(env);
-
+console.log('ENV -> ', env);
 const options: DataSourceOptions & SeederOptions = {
   type: 'postgres',
   host: env.DB_HOST,
