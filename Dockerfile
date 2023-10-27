@@ -14,17 +14,12 @@ RUN npm install
 COPY . .
 
 RUN npm run build
-RUN echo "Value of DB_HOST is: $DB_HOST"
-RUN npm run db:mig:run
-RUN npm run db:seed
 
 FROM node:20-buster as deployment
 
 WORKDIR /usr/src/app
 
 COPY package*.json ./
-
-
 
 RUN apt-get update && apt-get install -y \
     python \
