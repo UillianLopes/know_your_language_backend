@@ -13,7 +13,7 @@ RUN npm install
 
 COPY . .
 
-RUN echo $DB_HOST
+RUN echo $NODE_ENV
 
 RUN npm run build
 RUN npm run db:mig:run

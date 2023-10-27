@@ -7,19 +7,21 @@ import WordsEnUs1687705796 from './seeders/words-en-us.seeder';
 import PromptsSeeder1690164786 from './seeders/prompts.seeder';
 import * as process from 'process';
 
-let env: { [key: string]: string } = {};
+const nodeEnv = process.env?.NODE_ENV ?? 'dev';
 
-if (process.env?.NODE_ENV === 'prod') {
-  env = process.env;
-} else {
-  const envConfig = config({
-    path: 'environments/dev.env',
-  });
+const envOptions = {
+  prod: () => process.env,
+  dev: () => {
+    const envConfig = config({
+      path: 'environments/dev.env',
+    });
+    return envConfig.parsed;
+  },
+};
 
-  env = envConfig.parsed;
-}
+const env: { [key: string]: string } = envOptions[nodeEnv]();
 
-console.log(process.env);
+console.log(env);
 
 const options: DataSourceOptions & SeederOptions = {
   type: 'postgres',
