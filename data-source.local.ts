@@ -5,7 +5,6 @@ import UsersSeeder1687700404 from './seeders/users.seeder';
 import WordsPtBr1687698213 from './seeders/words-pt-br.seeder';
 import WordsEnUs1687705796 from './seeders/words-en-us.seeder';
 import PromptsSeeder1690164786 from './seeders/prompts.seeder';
-import * as process from 'process';
 
 let env: { [key: string]: string } = {};
 
