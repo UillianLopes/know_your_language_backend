@@ -14,6 +14,8 @@ RUN npm install
 COPY . .
 
 RUN npm run build
+RUN npm run db:mig:run
+RUN npm run db:seed
 
 FROM node:20-buster as deployment
 
@@ -27,8 +29,6 @@ RUN apt-get update && apt-get install -y \
     g++
 
 RUN npm install --omit=dev
-RUN npm run db:mig:gen
-RUN npm run db:seed
 
 COPY . .
 
