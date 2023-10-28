@@ -13,6 +13,8 @@ RUN npm install
 
 COPY . .
 
+ARG NODE_ENV
+ENV NODE_ENV=${NODE_ENV}
 RUN echo $NODE_ENV
 
 RUN npm run build
