@@ -34,6 +34,7 @@ import { Prompt } from '@kyl/entities/prompt.entity';
           database: process.env.DB_NAME,
           logging: true,
           entities: [User, Word, Meaning, Score, UserWord, Prompt],
+          migrationsRun: true,
         };
       },
     }),
